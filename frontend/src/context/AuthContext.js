@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
+const normalizeRole = (role) => (role ?? '').toString().trim().toLowerCase();
+
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
@@ -34,10 +36,11 @@ export const AuthProvider = ({ children }) => {
             console.log('Profile response:', response);
             
             if (response && response.success && response.user) {
-                setUser(response.user);
-                localStorage.setItem('userRole', response.user.role);
-                localStorage.setItem('user', JSON.stringify(response.user));
-                console.log('User loaded successfully:', response.user);
+                const normalizedUser = { ...response.user, role: normalizeRole(response.user.role) };
+                setUser(normalizedUser);
+                localStorage.setItem('userRole', normalizedUser.role);
+                localStorage.setItem('user', JSON.stringify(normalizedUser));
+                console.log('User loaded successfully:', normalizedUser);
             } else {
                 console.error('Invalid profile response:', response);
                 // If profile fetch fails but we have token, try to use stored user
@@ -75,16 +78,17 @@ export const AuthProvider = ({ children }) => {
                 const { token, user } = response;
                 console.log('Login successful, token:', token.substring(0, 20) + '...');
                 console.log('User:', user);
-                
+
+                const normalizedUser = { ...user, role: normalizeRole(user.role) };
                 localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(user));
-                localStorage.setItem('userRole', user.role);
+                localStorage.setItem('user', JSON.stringify(normalizedUser));
+                localStorage.setItem('userRole', normalizedUser.role);
                 
                 setToken(token);
-                setUser(user);
+                setUser(normalizedUser);
                 
                 toast.success(response.message || 'Login successful!');
-                return { success: true, user };
+                return { success: true, user: normalizedUser };
             } else {
                 console.error('Invalid login response format:', response);
                 throw new Error(response?.message || 'Login failed');
@@ -130,7 +134,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin'
+        isAdmin: normalizeRole(user?.role) === 'admin'
     };
 
     return (

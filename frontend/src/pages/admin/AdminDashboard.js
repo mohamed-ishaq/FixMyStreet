@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getAdminStats } from '../../services/adminService';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import StatsCard from '../../components/admin/StatsCard';
+import { useAuth } from '../../context/AuthContext';
 import { 
   FaMapMarkedAlt, 
   FaUsers, 
@@ -33,6 +34,7 @@ ChartJS.register(
 );
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     totalIssues: 0,
     totalUsers: 0,
@@ -149,6 +151,7 @@ const AdminDashboard = () => {
       
       <div className="dashboard-content">
         <h1>Admin Dashboard</h1>
+        {user?.full_name && <p className="admin-welcome">Welcome, {user.full_name}</p>}
 
         <div className="stats-grid">
           <StatsCard

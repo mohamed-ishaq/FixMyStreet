@@ -17,7 +17,7 @@ const Header = () => {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to="/dashboard" className="nav-logo">
+        <Link to={isAdmin ? "/admin" : "/dashboard"} className="nav-logo">
           <FaChartBar /> Civic Issues Platform
         </Link>
         

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { 
   FaChartBar, 
   FaList, 
@@ -9,6 +10,8 @@ import {
 } from 'react-icons/fa';
 
 const AdminSidebar = () => {
+  const { user } = useAuth();
+
   const menuItems = [
     { path: '/admin', icon: <FaChartBar />, label: 'Dashboard' },
     { path: '/admin/issues', icon: <FaList />, label: 'Manage Issues' },
@@ -21,6 +24,7 @@ const AdminSidebar = () => {
     <div className="admin-sidebar">
       <div className="sidebar-header">
         <h3>Admin Panel</h3>
+        {user?.full_name && <p className="admin-user-name">{user.full_name}</p>}
       </div>
       <nav className="sidebar-nav">
         {menuItems.map((item) => (

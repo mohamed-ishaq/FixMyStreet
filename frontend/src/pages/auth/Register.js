@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const [userType, setUserType] = useState('user'); // 'user' or 'admin'
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -82,12 +83,15 @@ const Register = () => {
 
     try {
       const { confirmPassword, ...registerData } = formData;
-      const response = await register(registerData);
+      const response = await register({
+        ...registerData,
+        role: userType === 'admin' ? 'admin' : 'people'
+      });
 
       if (response && response.success) {
         toast.success(response.message || 'Registration successful! Please login.');
         // Redirect to login page instead of dashboard
-        navigate('/login');
+        navigate(userType === 'admin' ? '/login?type=admin' : '/login');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -98,6 +102,7 @@ const Register = () => {
   };
 
   const fillDemoUser = () => {
+    setUserType('user');
     setFormData({
       username: 'demouser',
       full_name: 'Demo User',
@@ -110,6 +115,7 @@ const Register = () => {
   };
 
   const fillDemoAdmin = () => {
+    setUserType('admin');
     setFormData({
       username: 'demoadmin',
       full_name: 'Admin User',
@@ -168,6 +174,39 @@ const Register = () => {
           <div className="auth-header">
             <h2>Create Account</h2>
             <p>Join our civic issues platform</p>
+          </div>
+
+          {/* Account Type Tabs */}
+          <div className="user-type-tabs">
+            <button
+              type="button"
+              className={`tab-btn ${userType === 'user' ? 'active' : ''}`}
+              onClick={() => {
+                setUserType('user');
+                setErrors({});
+              }}
+            >
+              <FaUser /> User Register
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${userType === 'admin' ? 'active' : ''}`}
+              onClick={() => {
+                setUserType('admin');
+                setErrors({});
+              }}
+            >
+              <FaUserShield /> Admin Register
+            </button>
+          </div>
+
+          {/* Account Type Indicator */}
+          <div className={`user-type-indicator ${userType}`}>
+            {userType === 'admin' ? (
+              <>Creating an <strong>Administrator</strong> account</>
+            ) : (
+              <>Creating a <strong>Community Member</strong> account</>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
@@ -335,7 +374,7 @@ const Register = () => {
 
           <div className="auth-footer">
             <p>Already have an account?</p>
-            <Link to="/login" className="register-link">
+            <Link to={userType === 'admin' ? '/login?type=admin' : '/login'} className="register-link">
               Sign in here
               <FaArrowRight />
             </Link>

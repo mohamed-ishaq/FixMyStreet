@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowRight, FaUser, FaUserShield } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const { login, logout } = useAuth();
   const [userType, setUserType] = useState('user'); // 'user' or 'admin'
   const [formData, setFormData] = useState({
     email: '',
@@ -15,6 +16,13 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const type = new URLSearchParams(location.search).get('type');
+    if (type === 'admin' || type === 'user') {
+      setUserType(type);
+    }
+  }, [location.search]);
 
   // Demo credentials
   const demoCredentials = {
@@ -76,6 +84,12 @@ const Login = () => {
       if (response && response.success) {
         const userRole = response.user?.role;
         console.log('Login successful, role:', userRole);
+
+        if (userType === 'admin' && userRole !== 'admin') {
+          logout();
+          toast.error('This account is not an admin.');
+          return;
+        }
         
         // Small delay to ensure state is updated
         setTimeout(() => {

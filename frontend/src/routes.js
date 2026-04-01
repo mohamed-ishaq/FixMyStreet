@@ -22,6 +22,7 @@ import Settings from './pages/admin/Settings';
 // Components
 import PrivateRoute from './components/common/PrivateRoute';
 import Loading from './components/common/Loading';
+import { useAuth } from './context/AuthContext';
 
 // Route constants for easy maintenance
 export const ROUTES = {
@@ -252,10 +253,18 @@ const AppRoutes = () => {
       } />
       
       {/* Default Routes */}
-      <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+      <Route path={ROUTES.HOME} element={<HomeRedirect />} />
       <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
     </Routes>
   );
+};
+
+const HomeRedirect = () => {
+  const { loading, isAuthenticated, isAdmin } = useAuth();
+
+  if (loading) return <Loading message="Loading..." />;
+  if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />;
+  return <Navigate to={isAdmin ? ROUTES.ADMIN_DASHBOARD : ROUTES.DASHBOARD} replace />;
 };
 
 // Not Found Component
